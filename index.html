@@ -2,97 +2,29 @@
 <html>
 
 <head>
-    <meta charset="utf-8">
-    <title>Interactive Map with Persistent Symbol Color</title>
-    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+    <title>Full-Page Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        body {
+        body,
+        html {
+            height: 100%;
             margin: 0;
-            padding: 0;
         }
 
         #map {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 
 <body>
     <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        mapboxgl.accessToken = '';
-        var map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/outdoors-v11', // Use the outdoors style for topographic map
-            center: [-74.5, 40],
-            zoom: 9
-        });
-
-        // Load stored symbol colors from local storage
-        var storedColors = JSON.parse(localStorage.getItem('symbolColors')) || {};
-
-        // Function to update symbol colors based on stored data
-        function updateSymbolColors() {
-            if (map.getLayer('places')) {
-                var features = map.querySourceFeatures('places');
-                features.forEach(function (feature) {
-                    var id = feature.id;
-                    if (storedColors[id]) {
-                        map.setFeatureState(
-                            { source: 'places', id: id },
-                            { color: storedColors[id] }
-                        );
-                    }
-                });
-            }
-        }
-
-        map.on('load', () => {
-            // Load an image from an external URL.
-            map.loadImage(
-                '../peak-ticker/black-marker.svg',
-                (error, image) => {
-                    if (error) throw error;
-
-                    // Add the image to the map style.
-                    map.addImage('black-marker', image);
-
-                    // Add a data source containing one point feature.
-                    map.addSource('point', {
-                        'type': 'geojson',
-                        'data': {
-                            'type': 'FeatureCollection',
-                            'features': [
-                                {
-                                    'type': 'Feature',
-                                    'geometry': {
-                                        'type': 'Point',
-                                        'coordinates': [-77.4144, 25.0759]
-                                    }
-                                }
-                            ]
-                        }
-                    });
-
-                    // Add a layer to use the image to represent the data.
-                    map.addLayer({
-                        'id': 'points',
-                        'type': 'symbol',
-                        'source': 'point', // reference the data source
-                        'layout': {
-                            'icon-image': 'black-marker', // reference the image
-                            'icon-size': 0.25
-                        }
-                    });
-                }
-            );
-        });
-
+        var map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
     </script>
 </body>
 
