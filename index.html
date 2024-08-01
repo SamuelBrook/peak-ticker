@@ -14,26 +14,70 @@
         #map {
             height: 100%;
         }
+
+        .custom-icon {
+            background-color: transparent;
+            border: none;
+            padding: 0;
+        }
     </style>
 </head>
 
 <body>
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script>
         var map = L.map('map', {
             center: [54.5, -4], // Center the map around Great Britain
             zoom: 6, // Adjust the zoom level
             maxBounds: [
-                [49.5, -11], // Southwest corner
-                [61, 2]      // Northeast corner
+                [35, -30], // Southwest corner
+                [70, 25]   // Northeast corner
             ],
             maxBoundsViscosity: 1.0
         });
 
-        L.tileLayer('https://{a|b|c}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+        L.tileLayer('https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=1916ce16a1fe46b6a8966dc617269541', {
+            attribution: 'Maps © Thunderforest, Data © OpenStreetMap contributors'
         }).addTo(map);
+
+
+        var geocoder = L.Control.Geocoder.nominatim();
+        L.Control.geocoder({
+            geocoder: geocoder,
+            defaultMarkGeocode: false
+        })
+            .on('markgeocode', function (e) {
+                var bbox = e.geocode.bbox;
+                var poly = L.polygon([
+                    bbox.getSouthEast(),
+                    bbox.getNorthEast(),
+                    bbox.getNorthWest(),
+                    bbox.getSouthWest()
+                ]).addTo(map);
+                map.fitBounds(poly.getBounds());
+            })
+            .addTo(map);
+
+
+        // Define a custom icon
+        var customIcon = L.divIcon({
+            className: 'custom-icon',
+            html: '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon id="triangle" points="12,2 22,20 2,20" fill="black" /></svg>',
+            iconSize: [24, 24],
+            iconAnchor: [12, 20] // Adjust the anchor point
+        });
+
+        // Add the marker at the specified coordinates
+        var marker = L.marker([54.526938, -3.017343], { icon: customIcon }).addTo(map);
+
+
+        // Add a click event listener to the marker
+        marker.on('click', function () {
+            var triangle = document.getElementById('triangle');
+            triangle.setAttribute('fill', 'gold');
+        });
     </script>
 </body>
 
